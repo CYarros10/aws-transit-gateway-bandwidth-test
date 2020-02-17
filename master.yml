@@ -402,32 +402,34 @@ Resources:
             -
               -  "#!/bin/bash -xe"
               - "\n"
-              - "yum install awscli -y"
+              - "sudo yum install awscli -y"
               - "\n"
-              - "yum install iperf3 -y"
+              - "sudo yum install iperf3 -y"
               - "\n"
               -  "yum install git -y"
               - "\n"
               - "mkdir iperf"
+              - "\n"
+              - "chmod -R 777 iperf"
               - "\n"
               - "cd iperf"
               - "\n"
               - "git clone "
               - !Ref pGitRepoURL
               - "\n"
-              - "cd iperf-bandwidth-testing/"
+              - "cd iperf3-bandwidth-testing/"
               - "\n"
-              - "chmod 777 iperf-log-to-s3.sh"
+              - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
-              - "sed -i -r 's/ <insert-private-ip-here>/"
+              - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer2.PrivateIp
-              - "/g' log-to-s3.sh"
+              - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "sed -i -r 's/ <insert-s3-bucket-here>/"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' log-to-s3.sh"
+              - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * ec2-user ./iperf/iperf-bandwidth-testing/iperf-log-to-s3.sh >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * ec2-user ./iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -467,6 +469,8 @@ Resources:
               - "\n"
               - "mkdir iperf"
               - "\n"
+              - "chmod -R 777 iperf"
+              - "\n"
               - "cd iperf"
               - "\n"
               - "git clone "
@@ -476,15 +480,15 @@ Resources:
               - "\n"
               - "chmod 777 iperf-log-to-s3.sh"
               - "\n"
-              - "sed -i -r 's/ <insert-private-ip-here>/"
+              - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer2.PrivateIp
-              - "/g' log-to-s3.sh"
+              - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "sed -i -r 's/ <insert-s3-bucket-here>/"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' log-to-s3.sh"
+              - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * ec2-user ./iperf/iperf-bandwidth-testing/iperf-log-to-s3.sh >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * ec2-user ./iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -660,21 +664,3 @@ Outputs:
       Fn::GetAtt:
       - rEC2iPerfClient2
       - PublicIp
-
-  oUserData:
-    Description: ec2 user data
-    Value:
-      Fn::Join:
-        - ""
-        -
-          -  "#!/bin/bash -xe"
-          - "\n"
-          - "yum install awscli -y"
-          - "\n"
-          - "yum install iperf3 -y"
-          - "\n"
-          - "mkdir /home/ec2-user/iperf-logs"
-          - "\n"
-          - "iperf3 -c "
-          - !GetAtt rEC2iPerfServer1.PrivateIp
-          - " -p 5201 &>> iperf-logs/client.txt"
