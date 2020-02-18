@@ -32,11 +32,28 @@ Parameters:
   pKeyName:
     Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
     Type: AWS::EC2::KeyPair::KeyName
+    Default: prudkey
 
   pGitRepoURL:
     Description: git repo containing scripts
     Type: String
     Default: https://github.com/CYarros10/iperf3-bandwidth-testing.git
+
+  pSimpleTest:
+    Description: deploy only 1 pair of iperf client-server EC2 instances to test TGW
+    Type: String
+    Default: false
+
+  pMaxTest:
+    Description: deploy 10 pairs of iperf client-server EC2 instances to max out TGW bandwidth
+    Type: String
+    Default: true
+
+
+Conditions:
+  cSimpleTest: !Equals [ !Ref pSimpleTest, true ]
+  cMaxTest: !Equals [ !Ref pMaxTest, true]
+
 
 Mappings:
 
@@ -73,7 +90,6 @@ Mappings:
   mAZRegions:
       us-east-1:
         AZs: ["a", "b"]
-
 
 Resources:
 
@@ -282,6 +298,7 @@ Resources:
 
   rEC2iPerfServer1:
     Type: AWS::EC2::Instance
+    Condition: cSimpleTest
     Properties:
       InstanceType:
         Ref: pInstanceType
@@ -315,8 +332,412 @@ Resources:
         - Key: Name
           Value: iperf-server
 
+
   rEC2iPerfServer2:
     Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+  rEC2iPerfServer3:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+
+  rEC2iPerfServer4:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+
+  rEC2iPerfServer5:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+
+  rEC2iPerfServer6:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+
+  rEC2iPerfServer7:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+
+  rEC2iPerfServer8:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+
+  rEC2iPerfServer9:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+  rEC2iPerfServer10:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+  rEC2iPerfServer11:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+  rEC2iPerfServer12:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rServerPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "yum install awscli -y"
+              - "\n"
+              - "yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+  rEC2iPerfServer13:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
     Properties:
       InstanceType:
         Ref: pInstanceType
@@ -378,6 +799,7 @@ Resources:
 
   rEC2iPerfClient1:
     Type: AWS::EC2::Instance
+    Condition: cSimpleTest
     Properties:
       InstanceType:
         Ref: pInstanceType
@@ -422,21 +844,22 @@ Resources:
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
-              - !GetAtt rEC2iPerfServer2.PrivateIp
+              - !GetAtt rEC2iPerfServer1.PrivateIp
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * ec2-user /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
-          Value: iperf-client-1
+          Value: iperf-client
 
   rEC2iPerfClient2:
     Type: AWS::EC2::Instance
+    Condition: cMaxTest
     Properties:
       InstanceType:
         Ref: pInstanceType
@@ -488,12 +911,687 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * ec2-user ./iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
         - Key: Name
-          Value: iperf-client-2
+          Value: iperf-client
+
+
+  rEC2iPerfClient3:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer3.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClient4:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer4.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClient5:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer5.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClient6:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer6.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClient7:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer7.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClient8:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer8.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClient9:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer9.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClient10:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer10.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+  rEC2iPerfClient11:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer11.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+  rEC2iPerfClient12:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer12.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+  rEC2iPerfClient13:
+    Type: AWS::EC2::Instance
+    Condition: cMaxTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rClientPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo yum install awscli -y"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "yum install git -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd iperf3-bandwidth-testing/"
+              - "\n"
+              - "chmod 777 iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer13.PrivateIp
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+      Tags:
+        - Key: Name
+          Value: iperf-client
 
   riPerfClientSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -622,12 +1720,14 @@ Outputs:
 # Server
 # -------
   oServer1PublicIP:
+    Condition: cSimpleTest
     Description: Public IP address of the newly created EC2 instance - iperf server 1
     Value:
       Fn::GetAtt:
       - rEC2iPerfServer1
       - PublicIp
   oServer1PrivateIP:
+    Condition: cSimpleTest
     Description: Private IP address of the newly created EC2 instance - iperf server 1
     Value:
       Fn::GetAtt:
@@ -635,12 +1735,14 @@ Outputs:
       - PrivateIp
 
   oServer2PublicIP:
+    Condition: cMaxTest
     Description: Public IP address of the newly created EC2 instance - iperf server 2
     Value:
       Fn::GetAtt:
       - rEC2iPerfServer2
       - PublicIp
   oServer2PrivateIP:
+    Condition: cMaxTest
     Description: Private IP address of the newly created EC2 instance - iperf server 2
     Value:
       Fn::GetAtt:
@@ -652,6 +1754,7 @@ Outputs:
 # -------
 
   oClient1PublicIP:
+    Condition: cSimpleTest
     Description: Public IP address of the newly created EC2 instance - iperf client 1
     Value:
       Fn::GetAtt:
@@ -659,6 +1762,7 @@ Outputs:
       - PublicIp
 
   oClient2PublicIP:
+    Condition: cMaxTest
     Description: Public IP address of the newly created EC2 instance - iperf client 2
     Value:
       Fn::GetAtt:
