@@ -46,7 +46,7 @@ This GitHub Repository offers a cloudformation template to test this limit.
 
 ## Conclusion
 
-Based on the Cloudwatch metrics over time, you should see, on average, around 35 GB/s of traffic between the two VPCs.  Network bandwidth will occasionally reach 50 GB/s.
+Based on the Cloudwatch metrics over time, you should see, on average, *around 35 GB/s of traffic between the two VPCs*.  Network bandwidth will occasionally reach 50 GB/s.
 
 
 ## FAQs
@@ -61,4 +61,4 @@ The cloudformation template deploys two VPCs, both with public subnets and route
 
 - **How does the EC2 instance send traffic?**
 
-Upon creation, each EC2 instance will pull code from this github repository via the User Data.  The iperf3-log-to-s3.sh script does the iperf3 client to server traffic command.  The results of the command are spit into a client.json log file and uploaded to S3 bucket for archived analysis. A cronjob task is set to run iperf3-log-to-s3.sh every minute, ensuring that traffic is continuously being sent from each EC2 client to an EC2 server.
+Upon creation, each EC2 instance will pull code from this github repository via the User Data.  The iperf3-log-to-s3.sh script does the iperf3 client to iperf3 server traffic command.  The results of the command are delivered into a client.json log file and uploaded to a specified S3 bucket for archived analysis. A cronjob task is set to run iperf3-log-to-s3.sh every minute, ensuring that traffic is continuously being sent from each iperf3 client to an iperf3 server.
