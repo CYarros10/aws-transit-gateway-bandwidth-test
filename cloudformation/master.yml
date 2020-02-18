@@ -841,17 +841,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer1.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -901,17 +901,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer2.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -963,17 +963,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer3.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1025,17 +1025,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer4.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1087,17 +1087,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer5.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1149,17 +1149,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer6.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1211,17 +1211,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer7.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1273,17 +1273,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer8.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1335,17 +1335,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer9.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1397,17 +1397,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer10.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -1457,17 +1457,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer11.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -1517,17 +1517,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer12.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -1577,17 +1577,17 @@ Resources:
               - "\n"
               - "cd transit-gateway-bandwidth-test/"
               - "\n"
-              - "chmod 777 iperf3-log-to-s3.sh"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer13.PrivateIp
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
               - !Ref pS3BucketName
-              - "/g' iperf3-log-to-s3.sh"
+              - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
