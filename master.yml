@@ -37,7 +37,7 @@ Parameters:
   pGitRepoURL:
     Description: git repo containing scripts
     Type: String
-    Default: https://github.com/CYarros10/iperf3-bandwidth-testing.git
+    Default: https://github.com/CYarros10/transit-gateway-bandwidth-test.git
 
   pSimpleTest:
     Description: deploy only 1 pair of iperf client-server EC2 instances to test TGW
@@ -839,7 +839,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -851,7 +851,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -899,7 +899,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -911,7 +911,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -961,7 +961,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -973,7 +973,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1023,7 +1023,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1035,7 +1035,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1085,7 +1085,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1097,7 +1097,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1147,7 +1147,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1159,7 +1159,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1209,7 +1209,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1221,7 +1221,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1271,7 +1271,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1283,7 +1283,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1333,7 +1333,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1345,7 +1345,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
 
       Tags:
@@ -1395,7 +1395,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1407,7 +1407,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -1455,7 +1455,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1467,7 +1467,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -1515,7 +1515,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1527,7 +1527,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
@@ -1575,7 +1575,7 @@ Resources:
               - "\n"
               - "chmod -R 777 /iperf"
               - "\n"
-              - "cd iperf3-bandwidth-testing/"
+              - "cd transit-gateway-bandwidth-test/"
               - "\n"
               - "chmod 777 iperf3-log-to-s3.sh"
               - "\n"
@@ -1587,7 +1587,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * /iperf/transit-gateway-bandwidth-test/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
