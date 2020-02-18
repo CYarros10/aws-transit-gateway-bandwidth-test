@@ -51,14 +51,14 @@ Based on the Cloudwatch metrics over time, you should see, on average, around 35
 
 ## FAQs
 
-- what is iPerf3?
+- **What is iPerf3?**
 
-https://iperf.fr/
+A traffic testing package. Learn more here: https://iperf.fr/
 
-- What's happening during cloudformation deployment?
+- **What's happening during cloudformation deployment?**
 
 The cloudformation template deploys two VPCs, both with public subnets and route tables, and a transit gateway with both VPCs attached.  Because Transit Gateway has a limit of 50GB/s and EC2s have a limit of 5 GB/s bandwidth, it is necessary to deploy at least 10 EC2s in both VPCs. One VPC will have ~10 EC2s acting as iPerf3 servers that accept traffic, the other VPC will have ~10 EC2s acting as iPerf3 clients that will send traffic.  Transit Gateway allows us to use the Private IP address of the iPerf3 server EC2s, ensuring that no traffic is publicly facing.
 
-- How does the EC2 instance send traffic?
+- **How does the EC2 instance send traffic?**
 
 Upon creation, each EC2 instance will pull code from this github repository via the User Data.  The iperf3-log-to-s3.sh script does the iperf3 client to server traffic command.  The results of the command are spit into a client.json log file and uploaded to S3 bucket for archived analysis. A cronjob task is set to run iperf3-log-to-s3.sh every minute, ensuring that traffic is continuously being sent from each EC2 client to an EC2 server.
