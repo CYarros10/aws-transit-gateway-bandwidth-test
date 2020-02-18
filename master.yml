@@ -429,7 +429,7 @@ Resources:
               - !Ref pS3BucketName
               - "/g' iperf3-log-to-s3.sh"
               - "\n"
-              - "echo '* * * * * ec2-user ./iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "echo '* * * * * ec2-user /iperf/iperf3-bandwidth-testing/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
