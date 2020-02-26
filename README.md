@@ -34,8 +34,8 @@ This GitHub Repository offers a cloudformation template to test this limit.
 - Go to Cloudformation Console and deploy cloudformation/master.yml
 - For Parameters, choose the public key you want for SSH access. 
 - There are two parameters pDebugTest and pFullTest
-- - pDebugTest will deploy 3 VPCs and 3 EC2s. 1 client / 1 server / 1 extra
-- - pFullTest will deploy 3 VPCs and 11 EC2s. 5 client / 5 server / 1 extra (this will ensure maximizing TGW bandwidth)
+  - pDebugTest will deploy 3 VPCs and 3 EC2s. 1 client / 1 server / 1 extra
+  - pFullTest will deploy 3 VPCs and 11 EC2s. 5 client / 5 server / 1 extra (this will ensure maximizing TGW bandwidth)
 - Click next, then create.
 
 ### Step 2: Setup Cloudwatch Dashboard
