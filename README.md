@@ -49,7 +49,7 @@ This GitHub Repository offers a cloudformation template to test this limit.
 Note: This will not be data from TGW. This will be data from individual EC2 instances themselves.
 
 - Go to Amazon Athena console
-- run the following queries (each in their own Query Tab) and make sure to insert your own bucket and the current date:
+- run the following queries (each in their own Query Tab) and make sure to insert your own bucket:
 
       CREATE EXTERNAL TABLE networkbenchmark (
         `intervals` array<struct<
