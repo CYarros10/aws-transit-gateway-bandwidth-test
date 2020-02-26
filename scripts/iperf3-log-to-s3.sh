@@ -13,11 +13,13 @@ echo "Log: Performing iPerf3 bandwidth test..."
 
 
 echo "Log: appending instance-type and region..."
-jq -s add client.json instance-data.json
+jq -s add /iperf/client.json /iperf/instance-data.json > /iperf/iperf-log.json
 
 echo "Log: Sending iPerf3 logfile to S3..."
 # /bin/aws s3 cp /iperf/client.json s3://<insert-s3-bucket-here>/client_$current_time.json # Amazon Linux
-/usr/local/bin/aws s3 cp /iperf/client.json s3://<insert-s3-bucket-here>/d=$current_day/$INSTANCE_TYPE-$current_time.json # RHEL
+/usr/local/bin/aws s3 cp /iperf/iperf-log.json s3://<insert-s3-bucket-here>/d=$current_day/$INSTANCE_TYPE-$current_time.json # RHEL
 
-echo "Log: Removing temporary log file to maintain storage capacity..."
+echo "Log: Removing temporary log files to maintain storage capacity..."
 rm /iperf/client.json
+rm /iperf/instance-data.json
+rm /iperf/iperf-log.json
