@@ -13,8 +13,6 @@ echo "Log: Performing iPerf3 bandwidth test..."
 
 
 echo "Log: appending instance-type and region..."
-sed -i '$s/}/,\n"instance-type":$INSTANCE_TYPE",\n region:"$EC2_REGION"}/' /iperf/client.json
-
 jq -s add client.json instance-data.json
 
 echo "Log: Sending iPerf3 logfile to S3..."
