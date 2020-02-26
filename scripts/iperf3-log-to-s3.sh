@@ -11,7 +11,7 @@ EC2_REGION="`echo \"$EC2_AVAIL_ZONE\" | sed 's/[a-z]$//'`"
 echo "{\"instanceType\":\"${INSTANCE_TYPE}\", \"region\":\"${EC2_REGION}\"}" > /iperf/instance-data.json
 
 # Performing iPerf3 bandwidth test
-/bin/iperf3 -c <insert-private-ip-here> -p 5201 -P 10 -t 50 -f M --json &>> /iperf/client.json
+/bin/iperf3 -c <insert-private-ip-here> -p 5201 -P 10 -t 30 -f M --json &>> /iperf/client.json
 
 # appending instance-type and region
 jq -s add /iperf/client.json /iperf/instance-data.json > /iperf/iperf-log.json
