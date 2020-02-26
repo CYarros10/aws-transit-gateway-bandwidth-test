@@ -69,16 +69,16 @@ Note: This will not be data from TGW. This will be data from individual EC2 inst
 ----
 
       SELECT 
-        (min(interval.sum.bits_per_second)/1000000000) AS min,
-        (max(interval.sum.bits_per_second)/1000000000) AS max,
-        (avg(interval.sum.bits_per_second)/1000000000) AS avg,
-        (approx_percentile(interval.sum.bits_per_second, 0.95)/1000000000) AS p95,
+        round(CAST(min(interval.sum.bits_per_second)/1000000000 AS real),4) AS min,
+        round(CAST(max(interval.sum.bits_per_second)/1000000000 AS real),4) AS max,
+        round(CAST(avg(interval.sum.bits_per_second)/1000000000 AS real),4) AS avg,
+        round(CAST(approx_percentile(interval.sum.bits_per_second, 0.95)/1000000000 AS real),4) AS percentile95,
         region, 
-        instancetype 
+        instanceType 
       FROM networkbenchmark CROSS JOIN UNNEST(intervals) WITH ORDINALITY AS t(interval, counter)
-      WHERE d >= from_iso8601_date('2020-02-26') AND cardinality(intervals) = 50
-      GROUP BY region, instancetype 
-      ORDER BY region, instancetype;
+      WHERE d >= from_iso8601_date('2020-02-26')
+      GROUP BY region, instanceType 
+      ORDER BY region, instanceType;
 
 ## Conclusion
 
