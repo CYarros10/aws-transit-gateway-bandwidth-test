@@ -14,13 +14,13 @@ echo "{\"instanceType\":\"${INSTANCE_TYPE}\", \"region\":\"${EC2_REGION}\"}" > /
 /bin/iperf3 -c <insert-private-ip-here> -p 5201 -P 10 -t 30 -f M --json &>> /iperf/client.json
 
 # appending instance-type and region
-jq -s add /iperf/client.json /iperf/instance-data.json > /iperf/iperf-log.json
+/bin/jq -s add /iperf/client.json /iperf/instance-data.json > /iperf/iperf-log.json
 
 # removing unnecessary data points
-cat /iperf/iperf-log.json | jq '.intervals[] |= del(.streams, .sum.start, .sum.end, .sum.seconds, .sum.bytes, .sum.retransmits, .sum.omitted)' | jq 'del(.end, .start)' > /iperf/simplified.json
+cat /iperf/iperf-log.json | /bin/jq '.intervals[] |= del(.streams, .sum.start, .sum.end, .sum.seconds, .sum.bytes, .sum.retransmits, .sum.omitted)' | jq 'del(.end, .start)' > /iperf/simplified.json
 
 # flattening json for athena optimization
-jq -c . /iperf/simplified.json > /iperf/optimized.json
+/bin/jq -c . /iperf/simplified.json > /iperf/optimized.json
 
 # Sending iPerf3 logfile to S3
 # /bin/aws s3 cp /iperf/client.json s3://<insert-s3-bucket-here>/client_$current_time.json # Amazon Linux
