@@ -49,7 +49,7 @@ This GitHub Repository offers a cloudformation template to test this limit.
 
 ### Step 3: Query EC2 iPerf3 Client data with Amazon Athena 
 
-Note: This will not be data from TGW. This will be data from individual EC2 instances themselves.
+Note: This will not be data from TGW. This will be data from iperf3 client EC2s.
 
 - Go to Amazon Athena console
 - run the following queries (each in their own Query Tab) and make sure to insert your own bucket:
