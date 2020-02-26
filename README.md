@@ -62,7 +62,11 @@ Note: This will not be data from TGW. This will be data from individual EC2 inst
       ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
       LOCATION 's3://BUCKET_NAME/';
       
+----
+      
       MSCK REPAIR TABLE networkbenchmark;
+
+----
 
       SELECT 
         (min(interval.sum.bits_per_second)/1000000000) AS min,
