@@ -1146,6 +1146,8 @@ Resources:
         Ref: pInstanceType
       IamInstanceProfile: !Ref rEC2IamInstanceProfile
       SubnetId: !Ref rExtraPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfExtraSecurityGroup
       KeyName:
         Ref: pKeyName
       ImageId:
@@ -1325,4 +1327,16 @@ Outputs:
     Value:
       Fn::GetAtt:
       - rEC2iPerfClient2
+      - PublicIp
+
+# -------
+# Extra
+# -------
+
+  oEC2iPerfExtra1IP:
+    Condition: cDebugTest
+    Description: Public IP address of the newly created EC2 instance - iperf extra 1 (VPC outside TGW)
+    Value:
+      Fn::GetAtt:
+      - rEC2iPerfExtra1
       - PublicIp
