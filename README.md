@@ -44,9 +44,41 @@ This GitHub Repository offers a cloudformation template to test this limit.
 - Configure the graph title, window range, and auto-refresh to your desired settings.
 - If you'd like to add to a Cloudwatch Dashboard: Select Actions -> Add to Dashboard
 
+### Another Option: Query iperf3 data with Amazon Athena 
+
+Note: This will not be data from TGW. This will be data from individual EC2 instances themselves.
+
+- Go to Amazon Athena console
+- run the following queries and make sure to insert your own bucket and the current date:
+
+      CREATE EXTERNAL TABLE networkbenchmark (
+        `intervals` array<struct<
+          `sum`:struct<`bits_per_second`:decimal(38,6)>
+        >>,
+        instanceType string,
+        region string
+      )
+      PARTITIONED BY (d date)
+      ROW FORMAT SERDE 'org.openx.data.jsonserde.JsonSerDe'
+      LOCATION 's3://BUCKET_NAME/';
+      
+      MSCK REPAIR TABLE networkbenchmark;
+
+      SELECT 
+        (min(interval.sum.bits_per_second)/1000000000) AS min,
+        (max(interval.sum.bits_per_second)/1000000000) AS max,
+        (avg(interval.sum.bits_per_second)/1000000000) AS avg,
+        (approx_percentile(interval.sum.bits_per_second, 0.95)/1000000000) AS p95,
+        region, 
+        instancetype 
+      FROM networkbenchmark CROSS JOIN UNNEST(intervals) WITH ORDINALITY AS t(interval, counter)
+      WHERE d >= from_iso8601_date('2020-02-26') AND cardinality(intervals) = 50
+      GROUP BY region, instancetype 
+      ORDER BY region, instancetype;
+
 ## Conclusion
 
-Based on the Cloudwatch metrics over time, you should see, on average, *around 35 GB/s of traffic between the two VPCs*.  Network bandwidth will occasionally reach 50 GB/s.
+Based on the Cloudwatch metrics over time, you should see, on average, *around 15 GB/s of traffic between the two VPCs*.  Network bandwidth will occasionally reach 50 GB/s.
 
 
 ## FAQs
@@ -61,4 +93,4 @@ The cloudformation template deploys two VPCs, both with public subnets and route
 
 - **How does the EC2 instance send traffic?**
 
-Upon creation, each EC2 instance will pull code from this github repository via the User Data.  The iperf3-log-to-s3.sh script does the iperf3 client to iperf3 server traffic command.  The results of the command are delivered into a client.json log file and uploaded to a specified S3 bucket for archived analysis. A cronjob task is set to run iperf3-log-to-s3.sh every minute, ensuring that traffic is continuously being sent from each iperf3 client to an iperf3 server.
+Upon creation, each EC2 instance will pull code from this github repository via the User Data.  The iperf3-log-to-s3.sh script does the iperf3 client to iperf3 server traffic command.  The results of the command are delivered into a json log file and uploaded to a specified S3 bucket for archived analysis. A cronjob task is set to run iperf3-log-to-s3.sh every minute, ensuring that traffic is continuously being sent from each iperf3 client to an iperf3 server.
