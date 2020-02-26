@@ -56,7 +56,7 @@ Note: This will not be data from TGW. This will be data from individual EC2 inst
 
       CREATE EXTERNAL TABLE networkbenchmark (
         `intervals` array<struct<
-          `sum`:struct<`bits_per_second`:decimal(38,6)>
+          `sum`:struct<`bits_per_second`:decimal(38,10)>
         >>,
         instanceType string,
         region string
