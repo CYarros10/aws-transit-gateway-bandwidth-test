@@ -32,7 +32,10 @@ This GitHub Repository offers a cloudformation template to test this limit.
 
 - Download/Clone git repo
 - Go to Cloudformation Console and deploy cloudformation/master.yml
-- For Parameters, choose the public key you want for SSH access. Leave the rest as defaults.
+- For Parameters, choose the public key you want for SSH access. 
+- There are two parameters pDebugTest and pFullTest
+- - pDebugTest will deploy 3 VPCs and 3 EC2s. 1 client / 1 server / 1 extra
+- - pFullTest will deploy 3 VPCs and 11 EC2s. 5 client / 5 server / 1 extra (this will ensure maximizing TGW bandwidth)
 - Click next, then create.
 
 ### Step 2: Setup Cloudwatch Dashboard
@@ -44,7 +47,7 @@ This GitHub Repository offers a cloudformation template to test this limit.
 - Configure the graph title, window range, and auto-refresh to your desired settings.
 - If you'd like to add to a Cloudwatch Dashboard: Select Actions -> Add to Dashboard
 
-### Another Option: Query iperf3 data with Amazon Athena 
+### Step 3: Query EC2 iPerf3 Client data with Amazon Athena 
 
 Note: This will not be data from TGW. This will be data from individual EC2 instances themselves.
 
@@ -80,10 +83,28 @@ Note: This will not be data from TGW. This will be data from individual EC2 inst
       GROUP BY region, instanceType, d
       ORDER BY region, instanceType;
 
+
+### Test Internet Speeds from VPC to VPC outside of TGW (in pDebugTest Mode)
+
+- go to cloudformation console and go to tgw stack. 
+- click outputs and find extra ec2 instance IP Address (this ec2 sits in a separate VPC not connected via TGW)
+- ssh into client ec2 server
+      
+      ssh -i <private_key> ec2-user@<ip-address>
+      
+- crontab -e and delete the existing job to prevent anymore automated iperf tests.
+- run iperf3 test with extra ec2 instance IP address
+      
+      iperf3 -c <public-ip-address> -p 5201 -P 10 -t 30
+ 
+ - review speeds and compare with inter-tgw data
+
+
 ## Conclusion
 
-Based on the Cloudwatch metrics over time, you should see, on average, *around 15 GB/s of traffic between the two VPCs*.  Network bandwidth will occasionally reach 50 GB/s.
+Based on the Cloudwatch metrics over time, you should see, on average, *around 15 GB/s of inter-TGW traffic*.  Network bandwidth will occasionally reach 50 GB/s.
 
+----
 
 ## FAQs
 
