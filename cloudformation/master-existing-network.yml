@@ -1,0 +1,698 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Network bandwidth test across VPCs using iperf3 and transit gateways
+
+Parameters:
+  pInstanceType:
+    Description: WebServer EC2 instance type. m5n = up to 25 GBPS, m5 = up to 10 GPBS, t3 = low to moderate network performance.
+    Type: String
+    Default: m5n.large
+    AllowedValues:
+      - t3.large
+      - m5n.large
+    ConstraintDescription: must be a valid EC2 instance type.
+
+  pSSHLocation:
+    Description: The IP address range that can be used to SSH to the EC2 instances
+    Type: String
+    MinLength: '9'
+    MaxLength: '18'
+    Default: 0.0.0.0/0
+    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
+    ConstraintDescription: must be a valid IP CIDR range of the form x.x.x.x/x.
+
+  pS3BucketName:
+    Description: Name of bucket for logging destination
+    Type: String
+    Default: "iperf-logs-destination-1"
+
+  pKeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: prudkey
+
+  pGitRepoURL:
+    Description: git repo containing scripts
+    Type: String
+    Default: https://github.com/CYarros10/transit-gateway-bandwidth-test.git
+
+  pFullTest:
+    Description: If True - deploy 2 pairs of iperf client-server and 2 pairs of client-public EC2 instances (8 EC2 instances) to max out TGW bandwidth. If False - only 1 pair of client-server and 1 pair of client-public (4 ec2 instances)
+    Type: String
+    Default: true
+    AllowedValues:
+      - true
+      - false
+
+  pCronExpression:
+    Description: cron  to run the iperf command at a specific interval. default is once every minute. visit https://crontab.guru/ for more details.
+    Type: String
+    Default: '* * * * *'
+
+  pExistingVPCIDforServer:
+    Description: id of an existing vpc for server iperf ec2s
+    Type: String
+
+  pExistingVPCIDforClient:
+    Description: id of an existing vpc for client iperf ec2s
+    Type: String
+
+  pExistingVPCIDforPublic:
+    Description: id of an existing vpc for public iperf ec2s
+    Type: String
+
+  pExistingSubnetIDforServer:
+    Description: id of an existing subnet for server iperf ec2s
+    Type: String
+
+  pExistingSubnetIDforClient:
+    Description: id of an existing subnet for client iperf ec2s
+    Type: String
+
+  pExistingSubnetIDforPublic:
+    Description: id of an existing subnet for public iperf ec2s
+    Type: String
+
+Conditions:
+  cFullTest: !Equals [ !Ref pFullTest, true]
+
+Mappings:
+
+  mAWSInstanceType2Arch:
+    t3.nano:
+      Arch: HVM64
+    t3.micro:
+      Arch: HVM64
+    t3.small:
+      Arch: HVM64
+    t3.medium:
+      Arch: HVM64
+    t3.large:
+      Arch: HVM64
+    t3.xlarge:
+      Arch: HVM64
+    t3.2xlarge:
+      Arch: HVM64
+    m5.large:
+      Arch: HVM64
+    m5n.large:
+      Arch: HVM64
+
+  mAWSRegionArch2AMI:
+    us-east-1:
+      HVM64: ami-0c322300a1dd5dc79 # RedHat Linux 8
+
+Resources:
+
+#----------------------------------------------------------------------------------------------------------
+# EC2
+#----------------------------------------------------------------------------------------------------------
+
+# -------
+# Server
+# -------
+
+  rEC2iPerfServer1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforServer
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "echo 'installing python3 pip... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "echo 'installing aws-cli... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "pip3 install awscli --upgrade"
+              - "\n"
+              - "echo 'installing iperf3... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "echo 'starting iperf3 server... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+
+  rEC2iPerfServer2:
+    Type: AWS::EC2::Instance
+    Condition: cFullTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforServer
+      SecurityGroupIds:
+        - Ref: riPerfServerSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-server
+
+  riPerfServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref pExistingVPCIDforServer
+      GroupDescription: Enable
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp:
+          Ref: pSSHLocation
+      - IpProtocol: tcp
+        FromPort: 5201
+        ToPort: 5201
+        CidrIp: "0.0.0.0/0"
+      Tags:
+        - Key: Name
+          Value: iperf-server-sg
+
+# -------
+# Client
+# -------
+
+  rEC2iPerfClientToServer1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforClient
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "echo 'installing python3 pip... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "echo 'installing aws-cli... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "pip3 install awscli --upgrade"
+              - "\n"
+              - "echo 'installing iperf3... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "echo 'installing git... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              -  "sudo yum install git -y"
+              - "\n"
+              - "echo 'installing jq... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo yum install jq -y"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "echo 'cloning repo... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd transit-gateway-bandwidth-test/"
+              - "\n"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo 'updating dynamic information... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer1.PrivateIp
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo 'placing crontab... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "echo '"
+              - !Ref pCronExpression
+              - " /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+  rEC2iPerfClientToServer2:
+    Type: AWS::EC2::Instance
+    Condition: cFullTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforClient
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "sudo yum install git -y"
+              - "\n"
+              - "sudo yum install jq -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd transit-gateway-bandwidth-test/"
+              - "\n"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfServer2.PrivateIp
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '"
+              - !Ref pCronExpression
+              - " /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+  rEC2iPerfClientToPublic1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforClient
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "sudo pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "sudo yum install git -y"
+              - "\n"
+              - "sudo yum install jq -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd transit-gateway-bandwidth-test/"
+              - "\n"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfPublic1.PrivateIp
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '"
+              - !Ref pCronExpression
+              - " /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+
+  rEC2iPerfClientToPublic2:
+    Type: AWS::EC2::Instance
+    Condition: cFullTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforClient
+      SecurityGroupIds:
+        - Ref: riPerfClientSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              -  "sudo yum install git -y"
+              - "\n"
+              - "sudo yum install jq -y"
+              - "\n"
+              - "mkdir /iperf"
+              - "\n"
+              - "cd /iperf"
+              - "\n"
+              - "git clone "
+              - !Ref pGitRepoURL
+              - "\n"
+              - "chmod -R 777 /iperf"
+              - "\n"
+              - "cd transit-gateway-bandwidth-test/"
+              - "\n"
+              - "chmod 777 scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-private-ip-here>/"
+              - !GetAtt rEC2iPerfPublic2.PrivateIp
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "sed -i -r 's/<insert-s3-bucket-here>/"
+              - !Ref pS3BucketName
+              - "/g' scripts/iperf3-log-to-s3.sh"
+              - "\n"
+              - "echo '"
+              - !Ref pCronExpression
+              - " /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
+              - "\n"
+
+      Tags:
+        - Key: Name
+          Value: iperf-client
+
+  riPerfClientSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref pExistingVPCIDforClient
+      GroupDescription: Enable
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp:
+          Ref: pSSHLocation
+      - IpProtocol: tcp
+        FromPort: 5201
+        ToPort: 5201
+        CidrIp: "0.0.0.0/0"
+      Tags:
+        - Key: Name
+          Value: iperf-client-sg
+
+  rEC2IamInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref rClientEC2RoleS3
+
+  rClientEC2RoleS3:
+    Type: "AWS::IAM::Role"
+    Properties:
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+
+#---------------------
+# Extra
+#---------------------
+
+  rEC2iPerfPublic1:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforPublic
+      SecurityGroupIds:
+        - Ref: riPerfPublicSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: extra
+
+  rEC2iPerfPublic2:
+    Type: AWS::EC2::Instance
+    Condition: cFullTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref pExistingSubnetIDforPublic
+      SecurityGroupIds:
+        - Ref: riPerfPublicSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: extra
+
+  riPerfPublicSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref pExistingVPCIDforPublic
+      GroupDescription: Enable
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp:
+          Ref: pSSHLocation
+      - IpProtocol: tcp
+        FromPort: 5201
+        ToPort: 5201
+        CidrIp: "0.0.0.0/0"
+      Tags:
+        - Key: Name
+          Value: iperf-public
+
+
+Outputs:
+
+# -------
+# Server
+# -------
+  oServer1PublicIP:
+    Description: Public IP address of the newly created EC2 instance - iperf server 1
+    Value:
+      Fn::GetAtt:
+      - rEC2iPerfServer1
+      - PublicIp
+  oServer1PrivateIP:
+    Description: Private IP address of the newly created EC2 instance - iperf server 1
+    Value:
+      Fn::GetAtt:
+      - rEC2iPerfServer1
+      - PrivateIp
+
+# -------
+# Client
+# -------
+
+  oClientToServer1PublicIP:
+    Description: Public IP address of the newly created EC2 instance - iperf client 1
+    Value:
+      Fn::GetAtt:
+      - rEC2iPerfClientToServer1
+      - PublicIp
+
+  oClientToPublic1PublicIP:
+    Description: Public IP address of the newly created EC2 instance - iperf client 2
+    Value:
+      Fn::GetAtt:
+      - rEC2iPerfClientToPublic1
+      - PublicIp
+
+# -------
+# Public
+# -------
+
+  oEC2iPerfPublic1PublicIP:
+    Description: Public IP address of the newly created EC2 instance - iperf extra 1 (VPC outside TGW)
+    Value:
+      Fn::GetAtt:
+      - rEC2iPerfPublic1
+      - PublicIp
+
+  oEC2iPerfPublic1PrivateIP:
+    Description: Public IP address of the newly created EC2 instance - iperf extra 1 (VPC outside TGW)
+    Value:
+      Fn::GetAtt:
+      - rEC2iPerfPublic1
+      - PrivateIp
+

@@ -6,9 +6,6 @@ Parameters:
     Description: WebServer EC2 instance type. m5n = up to 25 GBPS, m5 = up to 10 GPBS, t3 = low to moderate network performance.
     Type: String
     Default: m5n.large
-    AllowedValues:
-      - t3.large
-      - m5n.large
     ConstraintDescription: must be a valid EC2 instance type.
 
   pSSHLocation:
@@ -35,16 +32,8 @@ Parameters:
     Type: String
     Default: https://github.com/CYarros10/transit-gateway-bandwidth-test.git
 
-  pDebugTest:
-    Description: deploy only 1 pair of iperf client-server EC2 instances to test TGW
-    Type: String
-    Default: false
-    AllowedValues:
-      - true
-      - false
-
   pFullTest:
-    Description: deploy 5 pairs of iperf client-server EC2 instances to max out TGW bandwidth
+    Description: If True - deploy 2 pairs of iperf client-server and 2 pairs of client-public EC2 instances (8 EC2 instances) to max out TGW bandwidth. If False - only 1 pair of client-server and 1 pair of client-public (4 ec2 instances)
     Type: String
     Default: true
     AllowedValues:
@@ -56,52 +45,24 @@ Parameters:
     Type: String
     Default: '* * * * *'
 
-  pCreateNewServerVPC:
-    Description: if true, then create new VPC for server iperf ec2s. if false create subnets in the provided VPC ID
-    Type: String
-    Default: true
-
-  pCreateNewClientVPC:
-    Description: if true, then create new VPC for client iperf ec2s. if false create subnets in the provided VPC ID
-    Type: String
-    Default: true
-
-  pExistingVPCIDforServers:
-    Description: id of an existing VPC for server iperf ec2s. leave blank if you are choosing to create new VPC.
-    Type: String
-
-  pExistingVPCIDforClients:
-    Description: id of an existing VPC for client iperf ec2s. leave blank if you are choosing to create new VPC.
-    Type: String
-
-  pExistingServerVPCInternetGatewayID:
-    Description: id of the internet gateway in the existing server VPC. leave blank if you are choosing to create new VPC.
-    Type: String
-
-  pExistingClientVPCInternetGatewayID:
-    Description: id of the internet gateway in the existing client VPC. leave blank if you are choosing to create new VPC.
-    Type: String
-
 Conditions:
-  cDebugTest: !Equals [ !Ref pDebugTest, true ]
   cFullTest: !Equals [ !Ref pFullTest, true]
-  cCreateNewServerVPC: !Equals [ !Ref pCreateNewServerVPC, true ]
-  cCreateNewClientVPC:  !Equals [ !Ref pCreateNewClientVPC, true ]
+
 
 Mappings:
 
   mNetworkConfig:
     ServerVPC:
       CIDR: "10.0.0.0/16"
-    ServerPublicA:
+    ServerPublicSubnetA:
       CIDR: "10.0.1.0/24"
     ClientVPC:
       CIDR: "10.1.0.0/16"
-    ClientPublicA:
+    ClientPublicSubnetA:
       CIDR: "10.1.1.0/24"
-    ExtraVPC:
+    PublicVPC:
       CIDR: "10.2.0.0/16"
-    ExtraPublicA:
+    PublicPublicSubnetA:
       CIDR: "10.2.1.0/24"
 
 
@@ -145,7 +106,6 @@ Resources:
 
   rServerVPC:
     Type: "AWS::EC2::VPC"
-    Condition: cCreateNewServerVPC
     Properties:
       EnableDnsHostnames: true
       CidrBlock:
@@ -156,7 +116,7 @@ Resources:
       InstanceTenancy: "default"
       Tags:
       - Key: Name
-        Value: prudential-vpc-server
+        Value: vpc-server
 
 # -------
 # Client
@@ -164,7 +124,6 @@ Resources:
 
   rClientVPC:
     Type: "AWS::EC2::VPC"
-    Condition: cCreateNewClientVPC
     Properties:
         CidrBlock:
           Fn::FindInMap:
@@ -174,24 +133,24 @@ Resources:
         InstanceTenancy: "default"
         Tags:
         - Key: Name
-          Value: prudential-vpc-client
+          Value: vpc-client
 
 # -------
-# Extra
+# Public
 # -------
 
-  rExtraVPC:
+  rPublicVPC:
     Type: "AWS::EC2::VPC"
     Properties:
         CidrBlock:
           Fn::FindInMap:
             - "mNetworkConfig"
-            - "ExtraVPC"
+            - "PublicVPC"
             - "CIDR"
         InstanceTenancy: "default"
         Tags:
         - Key: Name
-          Value: prudential-extra-vpc
+          Value: vpc-public
 
 
 #----------------------------------------------------------------------------------------------------------
@@ -211,11 +170,11 @@ Resources:
         Fn::Sub:
           - "${AWS::Region}${AZ}"
           - AZ: !Select [ 0, !FindInMap [ "mAZRegions", !Ref "AWS::Region", "AZs" ] ]
-      VpcId: !If [cCreateNewServerVPC, !Ref rServerVPC, !Ref pExistingVPCIDforServers]
+      VpcId: !Ref rServerVPC
       CidrBlock:
         Fn::FindInMap:
           - "mNetworkConfig"
-          - "ServerPublicA"
+          - "ServerPublicSubnetA"
           - "CIDR"
       MapPublicIpOnLaunch: True
       Tags:
@@ -235,11 +194,11 @@ Resources:
         Fn::Sub:
           - "${AWS::Region}${AZ}"
           - AZ: !Select [ 0, !FindInMap [ "mAZRegions", !Ref "AWS::Region", "AZs" ] ]
-      VpcId: !If [cCreateNewClientVPC, !Ref rClientVPC, !Ref pExistingVPCIDforClients]
+      VpcId: !Ref rClientVPC
       CidrBlock:
         Fn::FindInMap:
           - "mNetworkConfig"
-          - "ClientPublicA"
+          - "ClientPublicSubnetA"
           - "CIDR"
       MapPublicIpOnLaunch: True
       Tags:
@@ -247,28 +206,28 @@ Resources:
           Value: ClientPublicSubnetA
 
 # -------
-# Extra
+# Public
 # -------
 
-  rExtraPublicSubnetA:
+  rPublicPublicSubnetA:
     Type: AWS::EC2::Subnet
-    DependsOn: rExtraAttachInternetGateway
+    DependsOn: rPublicAttachInternetGateway
     Properties:
       AvailabilityZone:
         # Goes through the mAZRegions mapping to programmatically grab az
         Fn::Sub:
           - "${AWS::Region}${AZ}"
           - AZ: !Select [ 0, !FindInMap [ "mAZRegions", !Ref "AWS::Region", "AZs" ] ]
-      VpcId: !Ref rExtraVPC
+      VpcId: !Ref rPublicVPC
       CidrBlock:
         Fn::FindInMap:
           - "mNetworkConfig"
-          - "ExtraPublicA"
+          - "PublicPublicSubnetA"
           - "CIDR"
       MapPublicIpOnLaunch: True
       Tags:
         - Key: Name
-          Value: ExtraPublicSubnetA
+          Value: PublicPublicSubnetA
 
 #----------------------------------------------------------------------------------------------------------
 # VPC - Internet Gateway and Public Routes
@@ -279,21 +238,20 @@ Resources:
 # -------
 
   rServerVPCIGW:
-    Condition: cCreateNewServerVPC
     Type: AWS::EC2::InternetGateway
 
   rServerAttachInternetGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId: !If [cCreateNewServerVPC, !Ref rServerVPC, !Ref pExistingVPCIDforServers]
-      InternetGatewayId: !If [cCreateNewServerVPC, !Ref rServerVPCIGW, !Ref pExistingServerVPCInternetGatewayID]
+      VpcId: !Ref rServerVPC
+      InternetGatewayId: !Ref rServerVPCIGW
 
   rServerPublicRouteTable:
     Type: AWS::EC2::RouteTable
     DependsOn:
       - rServerAttachInternetGateway
     Properties:
-      VpcId: !If [cCreateNewServerVPC, !Ref rServerVPC, !Ref pExistingVPCIDforServers]
+      VpcId: !Ref rServerVPC
       Tags:
         - Key: Name
           Value: Server VPC Public Route Table
@@ -303,7 +261,7 @@ Resources:
     Properties:
       RouteTableId: !Ref rServerPublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !If [cCreateNewServerVPC, !Ref rServerVPCIGW, !Ref pExistingServerVPCInternetGatewayID]
+      GatewayId: !Ref rServerVPCIGW
 
   rServerToClientRouteViaTGW:
     Type: AWS::EC2::Route
@@ -330,21 +288,20 @@ Resources:
 # -------
 
   rClientVPCIGW:
-    Condition: cCreateNewClientVPC
     Type: AWS::EC2::InternetGateway
 
   rClientAttachInternetGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId: !If [cCreateNewClientVPC, !Ref rClientVPC, !Ref pExistingVPCIDforClients]
-      InternetGatewayId: !If [cCreateNewClientVPC, !Ref rClientVPCIGW, !Ref pExistingClientVPCInternetGatewayID]
+      VpcId: !Ref rClientVPC
+      InternetGatewayId: !Ref rClientVPCIGW
 
   rClientPublicRouteTable:
     Type: AWS::EC2::RouteTable
     DependsOn:
       - rClientAttachInternetGateway
     Properties:
-      VpcId: !If [cCreateNewClientVPC, !Ref rClientVPC, !Ref pExistingVPCIDforClients]
+      VpcId: !Ref rClientVPC
       Tags:
         - Key: Name
           Value: Client VPC Public Route Table
@@ -354,7 +311,7 @@ Resources:
     Properties:
       RouteTableId: !Ref rClientPublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !If [cCreateNewClientVPC, !Ref rClientVPCIGW, !Ref pExistingClientVPCInternetGatewayID]
+      GatewayId: !Ref rClientVPCIGW
 
   rClientToServerRouteViaTGW:
     Type: AWS::EC2::Route
@@ -378,42 +335,42 @@ Resources:
 
 
 # -------
-# Extra
+# Public
 # -------
 
-  rExtraVPCIGW:
+  rPublicVPCIGW:
     Type: AWS::EC2::InternetGateway
 
-  rExtraAttachInternetGateway:
+  rPublicAttachInternetGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      VpcId: !Ref rExtraVPC
-      InternetGatewayId: !Ref rExtraVPCIGW
+      VpcId: !Ref rPublicVPC
+      InternetGatewayId: !Ref rPublicVPCIGW
 
-  rExtraPublicRouteTable:
+  rPublicPublicRouteTable:
     Type: AWS::EC2::RouteTable
     DependsOn:
-      - rExtraAttachInternetGateway
+      - rPublicAttachInternetGateway
     Properties:
-      VpcId: !Ref rExtraVPC
+      VpcId: !Ref rPublicVPC
       Tags:
         - Key: Name
-          Value: Extra VPC Public Route Table
+          Value: Public VPC Public Route Table
 
-  rExtraPublicRoute:
+  rPublicPublicRoute:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref rExtraPublicRouteTable
+      RouteTableId: !Ref rPublicPublicRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref rExtraVPCIGW
+      GatewayId: !Ref rPublicVPCIGW
 
-  rExtraPublicSubnetARouteTableAssociation:
+  rPublicPublicSubnetARouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     DependsOn:
-      - rExtraAttachInternetGateway
+      - rPublicAttachInternetGateway
     Properties:
-      SubnetId: !Ref rExtraPublicSubnetA
-      RouteTableId: !Ref rExtraPublicRouteTable
+      SubnetId: !Ref rPublicPublicSubnetA
+      RouteTableId: !Ref rPublicPublicRouteTable
 
 #----------------------------------------------------------------------------------------------------------
 # EC2
@@ -425,7 +382,6 @@ Resources:
 
   rEC2iPerfServer1:
     Type: AWS::EC2::Instance
-    Condition: cDebugTest
     Properties:
       InstanceType:
         Ref: pInstanceType
@@ -452,16 +408,24 @@ Resources:
               - "\n"
               - "mkdir /iperf"
               - "\n"
-              - "sudo dnf install python3-pip -y > /iperf/log-python3-pip.txt"
+              - "echo 'installing python3 pip... \n' &>> /iperf/userdata-log.txt"
               - "\n"
-              - "pip3 install awscli --upgrade  > /iperf/log-awscli.txt"
+              - "sudo dnf install python3-pip -y"
               - "\n"
-              - "sudo yum install iperf3 -y > /iperf/log-iperf3.txt"
+              - "echo 'installing aws-cli... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "pip3 install awscli --upgrade"
+              - "\n"
+              - "echo 'installing iperf3... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "echo 'starting iperf3 server... \n' &>> /iperf/userdata-log.txt"
               - "\n"
               - "iperf3 -s"
       Tags:
         - Key: Name
-          Value: iperf-server
+          Value: iperf-server-1
 
 
   rEC2iPerfServer2:
@@ -500,162 +464,7 @@ Resources:
               - "iperf3 -s"
       Tags:
         - Key: Name
-          Value: iperf-server
-
-  rEC2iPerfServer3:
-    Type: AWS::EC2::Instance
-    Condition: cFullTest
-    Properties:
-      InstanceType:
-        Ref: pInstanceType
-      IamInstanceProfile: !Ref rEC2IamInstanceProfile
-      SubnetId: !Ref rServerPublicSubnetA
-      SecurityGroupIds:
-        - Ref: riPerfServerSecurityGroup
-      KeyName:
-        Ref: pKeyName
-      ImageId:
-        Fn::FindInMap:
-        - mAWSRegionArch2AMI
-        - Ref: AWS::Region
-        - Fn::FindInMap:
-          - mAWSInstanceType2Arch
-          - Ref: pInstanceType
-          - Arch
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            -
-              -  "#!/bin/bash -xe"
-              - "\n"
-              - "sudo dnf install python3-pip -y"
-              - "\n"
-              - "pip3 install awscli --upgrade "
-              - "\n"
-              - "sudo yum install iperf3 -y"
-              - "\n"
-              - "iperf3 -s"
-      Tags:
-        - Key: Name
-          Value: iperf-server
-
-
-  rEC2iPerfServer4:
-    Type: AWS::EC2::Instance
-    Condition: cFullTest
-    Properties:
-      InstanceType:
-        Ref: pInstanceType
-      IamInstanceProfile: !Ref rEC2IamInstanceProfile
-      SubnetId: !Ref rServerPublicSubnetA
-      SecurityGroupIds:
-        - Ref: riPerfServerSecurityGroup
-      KeyName:
-        Ref: pKeyName
-      ImageId:
-        Fn::FindInMap:
-        - mAWSRegionArch2AMI
-        - Ref: AWS::Region
-        - Fn::FindInMap:
-          - mAWSInstanceType2Arch
-          - Ref: pInstanceType
-          - Arch
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            -
-              -  "#!/bin/bash -xe"
-              - "\n"
-              - "sudo dnf install python3-pip -y"
-              - "\n"
-              - "pip3 install awscli --upgrade "
-              - "\n"
-              - "sudo yum install iperf3 -y"
-              - "\n"
-              - "iperf3 -s"
-      Tags:
-        - Key: Name
-          Value: iperf-server
-
-
-  rEC2iPerfServer5:
-    Type: AWS::EC2::Instance
-    Condition: cFullTest
-    Properties:
-      InstanceType:
-        Ref: pInstanceType
-      IamInstanceProfile: !Ref rEC2IamInstanceProfile
-      SubnetId: !Ref rServerPublicSubnetA
-      SecurityGroupIds:
-        - Ref: riPerfServerSecurityGroup
-      KeyName:
-        Ref: pKeyName
-      ImageId:
-        Fn::FindInMap:
-        - mAWSRegionArch2AMI
-        - Ref: AWS::Region
-        - Fn::FindInMap:
-          - mAWSInstanceType2Arch
-          - Ref: pInstanceType
-          - Arch
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            -
-              -  "#!/bin/bash -xe"
-              - "\n"
-              - "sudo dnf install python3-pip -y"
-              - "\n"
-              - "pip3 install awscli --upgrade "
-              - "\n"
-              - "sudo yum install iperf3 -y"
-              - "\n"
-              - "iperf3 -s"
-      Tags:
-        - Key: Name
-          Value: iperf-server
-
-
-  rEC2iPerfServer6:
-    Type: AWS::EC2::Instance
-    Condition: cFullTest
-    Properties:
-      InstanceType:
-        Ref: pInstanceType
-      IamInstanceProfile: !Ref rEC2IamInstanceProfile
-      SubnetId: !Ref rServerPublicSubnetA
-      SecurityGroupIds:
-        - Ref: riPerfServerSecurityGroup
-      KeyName:
-        Ref: pKeyName
-      ImageId:
-        Fn::FindInMap:
-        - mAWSRegionArch2AMI
-        - Ref: AWS::Region
-        - Fn::FindInMap:
-          - mAWSInstanceType2Arch
-          - Ref: pInstanceType
-          - Arch
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            -
-              -  "#!/bin/bash -xe"
-              - "\n"
-              - "sudo dnf install python3-pip -y"
-              - "\n"
-              - "pip3 install awscli --upgrade "
-              - "\n"
-              - "sudo yum install iperf3 -y"
-              - "\n"
-              - "iperf3 -s"
-      Tags:
-        - Key: Name
-          Value: iperf-server
+          Value: iperf-server-2
 
 
   riPerfServerSecurityGroup:
@@ -664,7 +473,7 @@ Resources:
       - rServerVPC
       - rServerPublicSubnetA
     Properties:
-      VpcId: !If [cCreateNewServerVPC, !Ref rServerVPC, !Ref pExistingVPCIDforServers]
+      VpcId: !Ref rServerVPC
       GroupDescription: Enable
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -684,9 +493,8 @@ Resources:
 # Client
 # -------
 
-  rEC2iPerfClient1:
+  rEC2iPerfClientToServer1:
     Type: AWS::EC2::Instance
-    Condition: cDebugTest
     Properties:
       InstanceType:
         Ref: pInstanceType
@@ -713,18 +521,29 @@ Resources:
               - "\n"
               - "mkdir /iperf"
               - "\n"
-              - "sudo dnf install python3-pip -y > /iperf/log-python3-pip.txt"
+              - "echo 'installing python3 pip... \n' &>> /iperf/userdata-log.txt"
               - "\n"
-              - "pip3 install awscli --upgrade > /iperf/log-awscli.txt"
+              - "sudo dnf install python3-pip -y"
               - "\n"
-              - "sudo yum install iperf3 -y > /iperf/log-iperf3.txt"
+              - "echo 'installing aws-cli... \n' &>> /iperf/userdata-log.txt"
               - "\n"
-              -  "sudo yum install git -y  > /iperf/log-git.txt"
+              - "pip3 install awscli --upgrade"
               - "\n"
-              - "sudo yum install jq -y > /iperf/log-jq.txt"
+              - "echo 'installing iperf3... \n' &>> /iperf/userdata-log.txt"
               - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "echo 'installing git... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              -  "sudo yum install git -y"
+              - "\n"
+              - "echo 'installing jq... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo yum install jq -y"
               - "\n"
               - "cd /iperf"
+              - "\n"
+              - "echo 'cloning repo... \n' &>> /iperf/userdata-log.txt"
               - "\n"
               - "git clone "
               - !Ref pGitRepoURL
@@ -735,6 +554,8 @@ Resources:
               - "\n"
               - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
+              - "echo 'updating dynamic information... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
               - !GetAtt rEC2iPerfServer1.PrivateIp
               - "/g' scripts/iperf3-log-to-s3.sh"
@@ -743,15 +564,17 @@ Resources:
               - !Ref pS3BucketName
               - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
+              - "echo 'placing crontab... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
               - "echo '"
               - !Ref pCronExpression
               - " /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
               - "\n"
       Tags:
         - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-server-1
 
-  rEC2iPerfClient2:
+  rEC2iPerfClientToServer2:
     Type: AWS::EC2::Instance
     Condition: cFullTest
     Properties:
@@ -816,12 +639,11 @@ Resources:
 
       Tags:
         - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-server-2
 
 
-  rEC2iPerfClient3:
+  rEC2iPerfClientToPublic1:
     Type: AWS::EC2::Instance
-    Condition: cFullTest
     Properties:
       InstanceType:
         Ref: pInstanceType
@@ -870,7 +692,7 @@ Resources:
               - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
-              - !GetAtt rEC2iPerfServer3.PrivateIp
+              - !GetAtt rEC2iPerfPublic1.PrivateIp
               - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
@@ -884,10 +706,10 @@ Resources:
 
       Tags:
         - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-public-1
 
 
-  rEC2iPerfClient4:
+  rEC2iPerfClientToPublic2:
     Type: AWS::EC2::Instance
     Condition: cFullTest
     Properties:
@@ -938,7 +760,7 @@ Resources:
               - "chmod 777 scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-private-ip-here>/"
-              - !GetAtt rEC2iPerfServer4.PrivateIp
+              - !GetAtt rEC2iPerfPublic2.PrivateIp
               - "/g' scripts/iperf3-log-to-s3.sh"
               - "\n"
               - "sed -i -r 's/<insert-s3-bucket-here>/"
@@ -952,151 +774,14 @@ Resources:
 
       Tags:
         - Key: Name
-          Value: iperf-client
-
-
-  rEC2iPerfClient5:
-    Type: AWS::EC2::Instance
-    Condition: cFullTest
-    Properties:
-      InstanceType:
-        Ref: pInstanceType
-      IamInstanceProfile: !Ref rEC2IamInstanceProfile
-      SubnetId: !Ref rClientPublicSubnetA
-      SecurityGroupIds:
-        - Ref: riPerfClientSecurityGroup
-      KeyName:
-        Ref: pKeyName
-      ImageId:
-        Fn::FindInMap:
-        - mAWSRegionArch2AMI
-        - Ref: AWS::Region
-        - Fn::FindInMap:
-          - mAWSInstanceType2Arch
-          - Ref: pInstanceType
-          - Arch
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            -
-              -  "#!/bin/bash -xe"
-              - "\n"
-              - "sudo dnf install python3-pip -y"
-              - "\n"
-              - "pip3 install awscli --upgrade "
-              - "\n"
-              - "sudo yum install iperf3 -y"
-              - "\n"
-              -  "sudo yum install git -y"
-              - "\n"
-              - "sudo yum install jq -y"
-              - "\n"
-              - "mkdir /iperf"
-              - "\n"
-              - "cd /iperf"
-              - "\n"
-              - "git clone "
-              - !Ref pGitRepoURL
-              - "\n"
-              - "chmod -R 777 /iperf"
-              - "\n"
-              - "cd transit-gateway-bandwidth-test/"
-              - "\n"
-              - "chmod 777 scripts/iperf3-log-to-s3.sh"
-              - "\n"
-              - "sed -i -r 's/<insert-private-ip-here>/"
-              - !GetAtt rEC2iPerfServer5.PrivateIp
-              - "/g' scripts/iperf3-log-to-s3.sh"
-              - "\n"
-              - "sed -i -r 's/<insert-s3-bucket-here>/"
-              - !Ref pS3BucketName
-              - "/g' scripts/iperf3-log-to-s3.sh"
-              - "\n"
-              - "echo '"
-              - !Ref pCronExpression
-              - " /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
-              - "\n"
-
-      Tags:
-        - Key: Name
-          Value: iperf-client
-
-
-  rEC2iPerfClient6:
-    Type: AWS::EC2::Instance
-    Condition: cFullTest
-    Properties:
-      InstanceType:
-        Ref: pInstanceType
-      IamInstanceProfile: !Ref rEC2IamInstanceProfile
-      SubnetId: !Ref rClientPublicSubnetA
-      SecurityGroupIds:
-        - Ref: riPerfClientSecurityGroup
-      KeyName:
-        Ref: pKeyName
-      ImageId:
-        Fn::FindInMap:
-        - mAWSRegionArch2AMI
-        - Ref: AWS::Region
-        - Fn::FindInMap:
-          - mAWSInstanceType2Arch
-          - Ref: pInstanceType
-          - Arch
-      UserData:
-        Fn::Base64:
-          Fn::Join:
-            - ""
-            -
-              -  "#!/bin/bash -xe"
-              - "\n"
-              - "sudo dnf install python3-pip -y"
-              - "\n"
-              - "pip3 install awscli --upgrade "
-              - "\n"
-              - "sudo yum install iperf3 -y"
-              - "\n"
-              -  "sudo yum install git -y"
-              - "\n"
-              - "sudo yum install jq -y"
-              - "\n"
-              - "mkdir /iperf"
-              - "\n"
-              - "cd /iperf"
-              - "\n"
-              - "git clone "
-              - !Ref pGitRepoURL
-              - "\n"
-              - "chmod -R 777 /iperf"
-              - "\n"
-              - "cd transit-gateway-bandwidth-test/"
-              - "\n"
-              - "chmod 777 scripts/iperf3-log-to-s3.sh"
-              - "\n"
-              - "sed -i -r 's/<insert-private-ip-here>/"
-              - !GetAtt rEC2iPerfServer6.PrivateIp
-              - "/g' scripts/iperf3-log-to-s3.sh"
-              - "\n"
-              - "sed -i -r 's/<insert-s3-bucket-here>/"
-              - !Ref pS3BucketName
-              - "/g' scripts/iperf3-log-to-s3.sh"
-              - "\n"
-              - "echo '"
-              - !Ref pCronExpression
-              - " /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh' >> /var/spool/cron/ec2-user"
-              - "\n"
-
-      Tags:
-        - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-public-2
 
   riPerfClientSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     DependsOn:
-      - rClientVPC
       - rClientPublicSubnetA
     Properties:
-      VpcId: !If [cCreateNewClientVPC, !Ref rClientVPC, !Ref pExistingVPCIDforClients]
+      VpcId: !Ref rClientVPC
       GroupDescription: Enable
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -1136,18 +821,18 @@ Resources:
           - sts:AssumeRole
 
 #---------------------
-# Extra
+# Public
 #---------------------
 
-  rEC2iPerfExtra1:
+  rEC2iPerfPublic1:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType:
         Ref: pInstanceType
       IamInstanceProfile: !Ref rEC2IamInstanceProfile
-      SubnetId: !Ref rExtraPublicSubnetA
+      SubnetId: !Ref rPublicPublicSubnetA
       SecurityGroupIds:
-        - Ref: riPerfExtraSecurityGroup
+        - Ref: riPerfPublicSecurityGroup
       KeyName:
         Ref: pKeyName
       ImageId:
@@ -1174,15 +859,53 @@ Resources:
               - "iperf3 -s"
       Tags:
         - Key: Name
-          Value: extra
+          Value: iperf-public-1
 
-  riPerfExtraSecurityGroup:
+  rEC2iPerfPublic2:
+    Type: AWS::EC2::Instance
+    Condition: cFullTest
+    Properties:
+      InstanceType:
+        Ref: pInstanceType
+      IamInstanceProfile: !Ref rEC2IamInstanceProfile
+      SubnetId: !Ref rPublicPublicSubnetA
+      SecurityGroupIds:
+        - Ref: riPerfPublicSecurityGroup
+      KeyName:
+        Ref: pKeyName
+      ImageId:
+        Fn::FindInMap:
+        - mAWSRegionArch2AMI
+        - Ref: AWS::Region
+        - Fn::FindInMap:
+          - mAWSInstanceType2Arch
+          - Ref: pInstanceType
+          - Arch
+      UserData:
+        Fn::Base64:
+          Fn::Join:
+            - ""
+            -
+              -  "#!/bin/bash -xe"
+              - "\n"
+              - "sudo dnf install python3-pip -y"
+              - "\n"
+              - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install iperf3 -y"
+              - "\n"
+              - "iperf3 -s"
+      Tags:
+        - Key: Name
+          Value: iperf-public-2
+
+  riPerfPublicSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     DependsOn:
-      - rExtraVPC
-      - rExtraPublicSubnetA
+      - rPublicVPC
+      - rPublicPublicSubnetA
     Properties:
-      VpcId: !Ref rExtraVPC
+      VpcId: !Ref rPublicVPC
       GroupDescription: Enable
       SecurityGroupIngress:
       - IpProtocol: tcp
@@ -1196,7 +919,7 @@ Resources:
         CidrIp: "0.0.0.0/0"
       Tags:
         - Key: Name
-          Value: iperf-extra
+          Value: iperf-public-sg
 
 #----------------------------------------------------------------------------------------------------------
 # Transit Gateway
@@ -1218,7 +941,7 @@ Resources:
       SubnetIds:
         - !Ref rServerPublicSubnetA
       TransitGatewayId: !Ref rTransitGateway
-      VpcId: !If [cCreateNewServerVPC, !Ref rServerVPC, !Ref pExistingVPCIDforServers]
+      VpcId: !Ref rServerVPC
       Tags:
         - Key: Name
           Value: iperf tgw server attachment
@@ -1229,7 +952,7 @@ Resources:
       SubnetIds:
         - !Ref rClientPublicSubnetA
       TransitGatewayId: !Ref rTransitGateway
-      VpcId: !If [cCreateNewClientVPC, !Ref rClientVPC, !Ref pExistingVPCIDforClients]
+      VpcId: !Ref rClientVPC
       Tags:
         - Key: Name
           Value: iperf tgw client attachment
@@ -1248,7 +971,7 @@ Resources:
       DestinationCidrBlock:
         Fn::FindInMap:
           - "mNetworkConfig"
-          - "ServerPublicA"
+          - "ServerPublicSubnetA"
           - "CIDR"
       TransitGatewayAttachmentId: !Ref rTransitGatewayServerVPCAttachment
       TransitGatewayRouteTableId: !Ref rTransitGatewayRouteTable
@@ -1259,7 +982,7 @@ Resources:
       DestinationCidrBlock:
         Fn::FindInMap:
           - "mNetworkConfig"
-          - "ClientPublicA"
+          - "ClientPublicSubnetA"
           - "CIDR"
       TransitGatewayAttachmentId: !Ref rTransitGatewayClientVPCAttachment
       TransitGatewayRouteTableId: !Ref rTransitGatewayRouteTable
@@ -1276,67 +999,87 @@ Resources:
 
 Outputs:
 
+
+# -------
+# VPC
+# -------
+  oServerVPCID:
+    Description: server vpc id
+    Value: !Ref rServerVPC
+
+  oClientVPCID:
+    Description: client vpc id
+    Value: !Ref rClientVPC
+
+  oPublicVPCID:
+    Description: public vpc id
+    Value: !Ref rPublicVPC
+
+
+# -------
+# Subnet
+# -------
+
+  oServerPublicSubnetA:
+    Description: server vpc public subnet A
+    Value: !Ref rServerPublicSubnetA
+
+  oClientPublicSubnetA:
+    Description: client vpc public subnet A
+    Value: !Ref rClientPublicSubnetA
+
+  oPublicPublicSubnetA:
+    Description: public vpc public subnet A
+    Value: !Ref rPublicPublicSubnetA
+
 # -------
 # Server
 # -------
   oServer1PublicIP:
-    Condition: cDebugTest
     Description: Public IP address of the newly created EC2 instance - iperf server 1
     Value:
       Fn::GetAtt:
       - rEC2iPerfServer1
       - PublicIp
   oServer1PrivateIP:
-    Condition: cDebugTest
     Description: Private IP address of the newly created EC2 instance - iperf server 1
     Value:
       Fn::GetAtt:
       - rEC2iPerfServer1
       - PrivateIp
 
-  oServer2PublicIP:
-    Condition: cFullTest
-    Description: Public IP address of the newly created EC2 instance - iperf server 2
-    Value:
-      Fn::GetAtt:
-      - rEC2iPerfServer2
-      - PublicIp
-  oServer2PrivateIP:
-    Condition: cFullTest
-    Description: Private IP address of the newly created EC2 instance - iperf server 2
-    Value:
-      Fn::GetAtt:
-      - rEC2iPerfServer2
-      - PrivateIp
-
 # -------
 # Client
 # -------
 
-  oClient1PublicIP:
-    Condition: cDebugTest
-    Description: Public IP address of the newly created EC2 instance - iperf client 1
+  oClientToServer1PublicIP:
+    Description: Public IP address of the newly created EC2 instance - iperf client to server
     Value:
       Fn::GetAtt:
-      - rEC2iPerfClient1
+      - rEC2iPerfClientToServer1
       - PublicIp
 
-  oClient2PublicIP:
-    Condition: cFullTest
-    Description: Public IP address of the newly created EC2 instance - iperf client 2
+  oClientToPublic1PublicIP:
+    Description: Public IP address of the newly created EC2 instance - iperf client to public
     Value:
       Fn::GetAtt:
-      - rEC2iPerfClient2
+      - rEC2iPerfClientToPublic1
       - PublicIp
 
 # -------
-# Extra
+# Public
 # -------
 
-  oEC2iPerfExtra1IP:
-    Condition: cDebugTest
-    Description: Public IP address of the newly created EC2 instance - iperf extra 1 (VPC outside TGW)
+  oEC2iPerfPublic1PublicIP:
+    Description: Public IP address of the newly created EC2 instance - iperf Public 1
     Value:
       Fn::GetAtt:
-      - rEC2iPerfExtra1
+      - rEC2iPerfPublic1
       - PublicIp
+
+# --------------
+# Transit Gateway
+# --------------
+  oTransitGatewayID:
+    Description: transit gateway attachment ID. use this to filter metrics in cloudwatch.
+    Value: !Ref rTransitGateway
