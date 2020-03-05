@@ -70,7 +70,7 @@ Deploys an entirely brand new networking infrastructure.
 - Example AWS CLI Commands:
 
             aws ssm send-command \
-            --instance-ids "<ec2-instance-id" \
+            --instance-ids "<ec2-instance-id>" \
             --document-name "AWS-RunShellScript" \
             --comment "iPerf Test" \
             --parameters commands=/iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh
