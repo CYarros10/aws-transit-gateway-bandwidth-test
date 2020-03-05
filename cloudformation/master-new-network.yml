@@ -41,7 +41,7 @@ Parameters:
       - false
 
   pCronExpression:
-    Description: cron  to run the iperf command at a specific interval. default is once every minute. visit https://crontab.guru/ for more details.
+    Description: cron  to run the iperf command at a specific interval. default is once every minute. visit https://crontab.guru/ for more details. leave blank if you don't want to run on a fixed schedule.
     Type: String
     Default: '* * * * *'
 
@@ -416,6 +416,8 @@ Resources:
               - "\n"
               - "pip3 install awscli --upgrade"
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "echo 'installing iperf3... \n' &>> /iperf/userdata-log.txt"
               - "\n"
               - "sudo yum install iperf3 -y"
@@ -458,6 +460,8 @@ Resources:
               - "sudo dnf install python3-pip -y"
               - "\n"
               - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
               - "\n"
               - "sudo yum install iperf3 -y"
               - "\n"
@@ -541,6 +545,8 @@ Resources:
               - "\n"
               - "sudo yum install jq -y"
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "cd /iperf"
               - "\n"
               - "echo 'cloning repo... \n' &>> /iperf/userdata-log.txt"
@@ -611,6 +617,8 @@ Resources:
               - "\n"
               - "sudo yum install jq -y"
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "mkdir /iperf"
               - "\n"
               - "cd /iperf"
@@ -677,6 +685,8 @@ Resources:
               -  "sudo yum install git -y"
               - "\n"
               - "sudo yum install jq -y"
+              - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
               - "\n"
               - "mkdir /iperf"
               - "\n"
@@ -745,6 +755,8 @@ Resources:
               - "sudo yum install git -y"
               - "\n"
               - "sudo yum install jq -y"
+              - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
               - "\n"
               - "mkdir /iperf"
               - "\n"
@@ -854,6 +866,8 @@ Resources:
               - "\n"
               - "pip3 install awscli --upgrade "
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "sudo yum install iperf3 -y"
               - "\n"
               - "iperf3 -s"
@@ -891,6 +905,8 @@ Resources:
               - "sudo dnf install python3-pip -y"
               - "\n"
               - "pip3 install awscli --upgrade "
+              - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
               - "\n"
               - "sudo yum install iperf3 -y"
               - "\n"
@@ -1083,3 +1099,11 @@ Outputs:
   oTransitGatewayID:
     Description: transit gateway attachment ID. use this to filter metrics in cloudwatch.
     Value: !Ref rTransitGateway
+
+# --------------
+# Misc
+# --------------
+
+  oiPerfRunCommand:
+    Description: command to run iperf3-log-to-s3.sh
+    Value: /iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh

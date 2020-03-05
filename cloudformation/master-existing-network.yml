@@ -44,7 +44,7 @@ Parameters:
       - false
 
   pCronExpression:
-    Description: cron  to run the iperf command at a specific interval. default is once every minute. visit https://crontab.guru/ for more details.
+    Description: cron  to run the iperf command at a specific interval. default is once every minute. visit https://crontab.guru/ for more details. leave blank if you don't want to run on a fixed schedule.
     Type: String
     Default: '* * * * *'
 
@@ -147,6 +147,10 @@ Resources:
               - "\n"
               - "pip3 install awscli --upgrade"
               - "\n"
+              - echo 'installing ssm... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "echo 'installing iperf3... \n' &>> /iperf/userdata-log.txt"
               - "\n"
               - "sudo yum install iperf3 -y"
@@ -156,8 +160,7 @@ Resources:
               - "iperf3 -s"
       Tags:
         - Key: Name
-          Value: iperf-server
-
+          Value: iperf-server-1
 
   rEC2iPerfServer2:
     Type: AWS::EC2::Instance
@@ -195,7 +198,7 @@ Resources:
               - "iperf3 -s"
       Tags:
         - Key: Name
-          Value: iperf-server
+          Value: iperf-server-2
 
   riPerfServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -256,6 +259,10 @@ Resources:
               - "\n"
               - "pip3 install awscli --upgrade"
               - "\n"
+              - echo 'installing ssm... \n' &>> /iperf/userdata-log.txt"
+              - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "echo 'installing iperf3... \n' &>> /iperf/userdata-log.txt"
               - "\n"
               - "sudo yum install iperf3 -y"
@@ -299,7 +306,7 @@ Resources:
               - "\n"
       Tags:
         - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-server-1
 
   rEC2iPerfClientToServer2:
     Type: AWS::EC2::Instance
@@ -338,6 +345,8 @@ Resources:
               - "\n"
               - "sudo yum install jq -y"
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "mkdir /iperf"
               - "\n"
               - "cd /iperf"
@@ -365,7 +374,7 @@ Resources:
               - "\n"
       Tags:
         - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-server-2
 
   rEC2iPerfClientToPublic1:
     Type: AWS::EC2::Instance
@@ -403,6 +412,8 @@ Resources:
               - "\n"
               - "sudo yum install jq -y"
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "mkdir /iperf"
               - "\n"
               - "cd /iperf"
@@ -431,7 +442,7 @@ Resources:
 
       Tags:
         - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-public-1
 
 
   rEC2iPerfClientToPublic2:
@@ -471,6 +482,8 @@ Resources:
               - "\n"
               - "sudo yum install jq -y"
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "mkdir /iperf"
               - "\n"
               - "cd /iperf"
@@ -499,7 +512,7 @@ Resources:
 
       Tags:
         - Key: Name
-          Value: iperf-client
+          Value: iperf-client-to-public-2
 
   riPerfClientSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -577,12 +590,14 @@ Resources:
               - "\n"
               - "pip3 install awscli --upgrade "
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "sudo yum install iperf3 -y"
               - "\n"
               - "iperf3 -s"
       Tags:
         - Key: Name
-          Value: extra
+          Value: iperf-public-1
 
   rEC2iPerfPublic2:
     Type: AWS::EC2::Instance
@@ -615,12 +630,14 @@ Resources:
               - "\n"
               - "pip3 install awscli --upgrade "
               - "\n"
+              - "sudo yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+              - "\n"
               - "sudo yum install iperf3 -y"
               - "\n"
               - "iperf3 -s"
       Tags:
         - Key: Name
-          Value: extra
+          Value: iperf-public-2
 
   riPerfPublicSecurityGroup:
     Type: AWS::EC2::SecurityGroup
