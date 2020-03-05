@@ -69,9 +69,14 @@ Deploys an entirely brand new networking infrastructure.
 - If you'd like to run commands on demand, you can use SSM Run Command
 - Example AWS CLI Commands:
 
-            aws ssm send-command --instance-ids "<ec2-instance-id" --document-name "AWS-RunShellScript" --comment "iPerf Test" --parameters commands=/iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh
+            aws ssm send-command \
+            --instance-ids "<ec2-instance-id" \
+            --document-name "AWS-RunShellScript" \
+            --comment "iPerf Test" \
+            --parameters commands=/iperf/transit-gateway-bandwidth-test/scripts/iperf3-log-to-s3.sh
             
 
+----
             
             aws ssm send-command \
             --targets "Key=tag:Name,Values=iperf-client-to-server-1, iperf-client-to-server-2" \
