@@ -20,7 +20,7 @@ This GitHub Repository offers a cloudformation template to test this limit.
 
 ## Architecture
 
-![Stack-Resources](https://github.com/CYarros10/transit-gateway-bandwidth-test/blob/master/images/architecture-design-pattern.png)
+![Stack-Resources](images/architecture-design-pattern.png)
 
 ----
 
